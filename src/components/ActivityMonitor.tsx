@@ -112,7 +112,6 @@ export const ActivityMonitor: React.FC<ActivityMonitorProps> = ({
         flex: 1,
         display: 'flex',
         flexDirection: 'column',
-        borderLeft: THEME.borders.thin,
         padding: THEME.spacing.lg,
       }}
     >

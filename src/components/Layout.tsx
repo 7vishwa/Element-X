@@ -13,10 +13,10 @@ export const GhostAgentLayout: React.FC = () => {
   const [showSecureBridge, setShowSecureBridge] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [currentTime, setCurrentTime] = useState('');
+  const [activeNav, setActiveNav] = useState<'chat' | 'monitor'>('chat');
 
   useEffect(() => {
     setMounted(true);
-    // Auto-show SecureBridge on first load
     const hasConnected = localStorage.getItem('ghostAgentConnected');
     if (!hasConnected) {
       setShowSecureBridge(true);
@@ -24,7 +24,6 @@ export const GhostAgentLayout: React.FC = () => {
       setIsConnected(true);
     }
 
-    // Update time on client only
     setCurrentTime(new Date().toLocaleString());
     const timer = setInterval(() => {
       setCurrentTime(new Date().toLocaleString());
@@ -46,6 +45,11 @@ export const GhostAgentLayout: React.FC = () => {
     }
   };
 
+  const navItems = [
+    { id: 'chat' as const, label: 'CHAT', icon: '◇' },
+    { id: 'monitor' as const, label: 'MONITOR', icon: '◈' },
+  ];
+
   return (
     <div
       style={{
@@ -54,7 +58,7 @@ export const GhostAgentLayout: React.FC = () => {
         backgroundColor: THEME.colors.background,
         color: THEME.colors.white,
         display: 'flex',
-        flexDirection: 'column',
+        flexDirection: 'row',
         position: 'relative',
         overflow: 'hidden',
       }}
@@ -74,58 +78,160 @@ export const GhostAgentLayout: React.FC = () => {
         }}
       />
 
-      {/* Header */}
-      <motion.header
+      {/* Left Sidebar Navigation */}
+      <motion.aside
         style={{
-          padding: `${THEME.spacing.lg} ${THEME.spacing.xl}`,
-          borderBottom: THEME.borders.thin,
+          width: '64px',
+          minWidth: '64px',
+          borderRight: THEME.borders.thin,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
           position: 'relative',
           zIndex: 1,
+          paddingTop: THEME.spacing.lg,
+          paddingBottom: THEME.spacing.lg,
         }}
-        {...MOTION.slideInFromTop}
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.05, duration: 0.4 }}
       >
+        {/* Logo / Brand Mark */}
+        <motion.div
+          style={{
+            width: '36px',
+            height: '36px',
+            border: THEME.borders.medium,
+            borderRadius: THEME.borderRadius.small,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '18px',
+            fontFamily: THEME.typography.mono,
+            fontWeight: 700,
+            marginBottom: THEME.spacing.xl,
+            cursor: 'pointer',
+          }}
+          whileHover={{ scale: 1.1, borderColor: THEME.colors.active }}
+          whileTap={{ scale: 0.95 }}
+        >
+          ◆
+        </motion.div>
+
+        {/* Nav Items */}
         <div
           style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: THEME.spacing.sm,
+            flex: 1,
+          }}
+        >
+          {navItems.map((item) => (
+            <motion.button
+              key={item.id}
+              onClick={() => setActiveNav(item.id)}
+              style={{
+                width: '44px',
+                height: '44px',
+                border: activeNav === item.id ? THEME.borders.thin : '1px solid transparent',
+                borderRadius: THEME.borderRadius.small,
+                backgroundColor: activeNav === item.id ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
+                color: activeNav === item.id ? THEME.colors.white : THEME.colors.inactive,
+                fontFamily: THEME.typography.mono,
+                fontSize: '16px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: THEME.transitions.fast,
+              }}
+              whileHover={{
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                color: THEME.colors.white,
+              }}
+              title={item.label}
+            >
+              {item.icon}
+            </motion.button>
+          ))}
+        </div>
+
+        {/* Connection indicator at bottom of sidebar */}
+        <motion.div
+          style={{
+            width: '10px',
+            height: '10px',
+            borderRadius: '50%',
+            backgroundColor: isConnected ? THEME.colors.active : THEME.colors.inactive,
+            boxShadow: isConnected ? `0 0 8px ${THEME.colors.active}` : 'none',
+          }}
+          animate={isConnected ? { opacity: [1, 0.5, 1] } : {}}
+          transition={isConnected ? { duration: 2, repeat: Infinity } : {}}
+        />
+      </motion.aside>
+
+      {/* Main Content Area */}
+      <div
+        style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          position: 'relative',
+          zIndex: 1,
+          minWidth: 0,
+        }}
+      >
+        {/* Top Toolbar */}
+        <motion.header
+          style={{
+            padding: `${THEME.spacing.md} ${THEME.spacing.xl}`,
+            borderBottom: THEME.borders.thin,
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
           }}
+          {...MOTION.slideInFromTop}
         >
-          <div>
-            <motion.h1
-              style={{
-                fontSize: THEME.typography['2xl'],
-                fontFamily: THEME.typography.mono,
-                fontWeight: 700,
-                margin: 0,
-                marginBottom: THEME.spacing.sm,
-              }}
-              initial={{ opacity: 0, x: -20 }}
+          <div style={{ display: 'flex', alignItems: 'center', gap: THEME.spacing.lg }}>
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 }}
             >
-              ◆ GHOST AGENT
-            </motion.h1>
-            <motion.p
+              <h1
+                style={{
+                  fontSize: THEME.typography.xl,
+                  fontFamily: THEME.typography.mono,
+                  fontWeight: 700,
+                  margin: 0,
+                  letterSpacing: '-0.5px',
+                }}
+              >
+                GHOST AGENT
+              </h1>
+            </motion.div>
+
+            <motion.span
               style={{
-                fontSize: THEME.typography.sm,
-                fontFamily: THEME.typography.sans,
+                fontSize: THEME.typography.xs,
+                fontFamily: THEME.typography.mono,
                 color: THEME.colors.inactive,
-                margin: 0,
+                borderLeft: '1px solid rgba(255,255,255,0.2)',
+                paddingLeft: THEME.spacing.lg,
               }}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.15 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
             >
-              Agentic Intermediary for Social Messaging
-            </motion.p>
+              {mounted ? currentTime : ''}
+            </motion.span>
           </div>
 
-          {/* Control Panel */}
           <motion.div
             style={{
               display: 'flex',
-              gap: THEME.spacing.lg,
+              gap: THEME.spacing.md,
               alignItems: 'center',
             }}
             initial={{ opacity: 0, x: 20 }}
@@ -135,18 +241,18 @@ export const GhostAgentLayout: React.FC = () => {
             <StatusIndicator
               status={isConnected ? 'connected' : 'disconnected'}
               animated={isConnected}
-              size="md"
+              size="sm"
             />
 
             <button
               onClick={toggleConnection}
               style={{
-                padding: `${THEME.spacing.md} ${THEME.spacing.lg}`,
+                padding: `${THEME.spacing.xs} ${THEME.spacing.lg}`,
                 backgroundColor: isConnected ? THEME.colors.background : THEME.colors.white,
                 border: THEME.borders.thin,
                 color: isConnected ? THEME.colors.white : THEME.colors.black,
                 fontFamily: THEME.typography.mono,
-                fontSize: THEME.typography.sm,
+                fontSize: THEME.typography.xs,
                 fontWeight: 600,
                 cursor: 'pointer',
                 borderRadius: THEME.borderRadius.small,
@@ -178,63 +284,52 @@ export const GhostAgentLayout: React.FC = () => {
               {isConnected ? 'DISCONNECT' : 'CONNECT'}
             </button>
           </motion.div>
-        </div>
-      </motion.header>
+        </motion.header>
 
-      {/* Main Content */}
-      <motion.main
-        style={{
-          flex: 1,
-          display: 'flex',
-          gap: THEME.spacing.md,
-          padding: THEME.spacing.lg,
-          position: 'relative',
-          zIndex: 1,
-          minHeight: 0,
-        }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3 }}
-      >
-        {/* Left Column - Chat Interface */}
-        <motion.div
+        {/* Main Split View */}
+        <motion.main
           style={{
             flex: 1,
             display: 'flex',
-            minWidth: 0,
+            flexDirection: 'row',
+            minHeight: 0,
+            position: 'relative',
           }}
-          {...MOTION.slideInFromLeft}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
         >
-          <ChatInterface isConnected={isConnected} />
-        </motion.div>
+          {/* Chat Interface - takes more space */}
+          <motion.div
+            style={{
+              flex: 3,
+              display: 'flex',
+              minWidth: 0,
+              borderRight: THEME.borders.thin,
+            }}
+            {...MOTION.slideInFromLeft}
+          >
+            <ChatInterface isConnected={isConnected} />
+          </motion.div>
 
-        {/* Right Column - Activity Monitor */}
-        <motion.div
-          style={{
-            flex: 1,
-            display: 'flex',
-            minWidth: 0,
-          }}
-          {...MOTION.slideInFromRight}
-        >
-          <ActivityMonitor isConnected={isConnected} />
-        </motion.div>
-      </motion.main>
+          {/* Activity Monitor - narrower right panel */}
+          <motion.div
+            style={{
+              flex: 2,
+              display: 'flex',
+              minWidth: 0,
+            }}
+            {...MOTION.slideInFromRight}
+          >
+            <ActivityMonitor isConnected={isConnected} />
+          </motion.div>
+        </motion.main>
 
-      {/* Footer */}
-      <motion.footer
-        style={{
-          padding: `${THEME.spacing.md} ${THEME.spacing.xl}`,
-          borderTop: THEME.borders.thin,
-          position: 'relative',
-          zIndex: 1,
-        }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.4 }}
-      >
-        <div
+        {/* Bottom Status Bar */}
+        <motion.footer
           style={{
+            padding: `${THEME.spacing.xs} ${THEME.spacing.xl}`,
+            borderTop: THEME.borders.thin,
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
@@ -242,15 +337,19 @@ export const GhostAgentLayout: React.FC = () => {
             fontFamily: THEME.typography.mono,
             color: THEME.colors.inactive,
           }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
         >
-          <span>
-            v1.0.0 | Ghost Agent UI — Agentic Intermediary
-          </span>
-          <span>
-            {mounted ? currentTime : ''}
-          </span>
-        </div>
-      </motion.footer>
+          <span>v1.0.0 — Ghost Agent UI</span>
+          <div style={{ display: 'flex', gap: THEME.spacing.lg, alignItems: 'center' }}>
+            <span style={{ color: isConnected ? THEME.colors.active : THEME.colors.inactive }}>
+              {isConnected ? '● BRIDGE ACTIVE' : '○ BRIDGE INACTIVE'}
+            </span>
+            <span>Agentic Intermediary</span>
+          </div>
+        </motion.footer>
+      </div>
 
       {/* Secure Bridge Modal */}
       <SecureBridge
