@@ -81,9 +81,8 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         display: 'flex',
         flexDirection: 'column',
         height: '100%',
+        width: '100%',
         backgroundColor: THEME.colors.background,
-        border: THEME.borders.thin,
-        borderRadius: THEME.borderRadius.small,
         overflow: 'hidden',
       }}
     >
